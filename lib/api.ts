@@ -1,7 +1,7 @@
 import { Product, ProductsResponse } from '@/types/product';
 import { Category } from '@/types/category';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://vinca-server-one.vercel.app/api';
 
 export async function fetchProducts(params?: {
   page?: number;
