@@ -33,18 +33,19 @@ export default async function ProductPage({ params }: PageProps) {
   }
 
   // Build breadcrumb from category hierarchy
-  const breadcrumbItems = [];
+  type BreadcrumbItem = { label: string; href?: string };
+  const breadcrumbItems: BreadcrumbItem[] = [{ label: 'HOME', href: '/' }];
   
   // Find the category for this product
   const categoryId = typeof product.category === 'string' 
     ? product.category 
     : product.category?._id;
   
-  if (categoryId) {
-    const findCategoryPath = (catId: string, path: Array<{ label: string; href?: string }> = []): Array<{ label: string; href?: string }> => {
+  if (categoryId && categories.length > 0) {
+    const findCategoryPath = (catId: string, path: BreadcrumbItem[] = []): BreadcrumbItem[] => {
       const category = categories.find((c: any) => c._id === catId);
       if (category) {
-        const newPath = [{ label: category.name.toUpperCase(), href: `/categories/${category.slug}` }, ...path];
+        const newPath: BreadcrumbItem[] = [{ label: category.name.toUpperCase(), href: `/categories/${category.slug}` }, ...path];
         if (category.parent) {
           const parentId = typeof category.parent === 'string' ? category.parent : category.parent._id;
           return findCategoryPath(parentId, newPath);
@@ -55,14 +56,7 @@ export default async function ProductPage({ params }: PageProps) {
     };
     
     const categoryPath = findCategoryPath(categoryId);
-    breadcrumbItems.push({ label: 'HOME', href: '/' }, ...categoryPath);
-  } else {
-    breadcrumbItems.push({ label: 'HOME', href: '/' });
-  }
-
-  // Add gender if available
-  if (product.gender && product.gender !== 'unisex') {
-    breadcrumbItems.push({ label: product.gender.toUpperCase(), href: `/${product.gender}` });
+    breadcrumbItems.push(...categoryPath);
   }
 
   // Add product name as final breadcrumb item (no link)
