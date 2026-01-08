@@ -67,10 +67,17 @@ export default function ProductGrid({ products }: ProductGridProps) {
         {/* Call to Action */}
         {products.length > 0 && (
           <div className="text-center mb-12">
-            <button className="bg-black text-white px-8 py-3 text-xs font-light uppercase tracking-wider hover:opacity-80 transition-opacity mb-4">
+            <Link
+              href="/products"
+              className="inline-block border border-black text-black px-8 py-3 text-xs font-light uppercase tracking-wider hover:bg-black hover:text-white transition-all mb-4"
+            >
               SHOP SIMILAR
-            </button>
-            <p className="text-xs font-light text-gray-600">VIEW ALL PRODUCTS</p>
+            </Link>
+            <p className="text-xs font-light text-gray-600 mt-4">
+              <Link href="/products" className="hover:underline">
+                VIEW ALL PRODUCTS
+              </Link>
+            </p>
           </div>
         )}
       </div>

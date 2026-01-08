@@ -1,4 +1,5 @@
 import { Product, ProductsResponse } from '@/types/product';
+import { Category } from '@/types/category';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -72,6 +73,39 @@ export async function fetchFeaturedProducts(): Promise<Product[]> {
 
   if (!response.ok) {
     throw new Error(`Failed to fetch featured products: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export async function fetchCategories(parentOnly: boolean = false): Promise<Category[]> {
+  const queryParam = parentOnly ? '?parentOnly=true' : '';
+  const response = await fetch(`${API_BASE_URL}/categories${queryParam}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    next: { revalidate: 60 }, // Revalidate every 60 seconds
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch categories: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export async function fetchCategoriesByParent(parentId: string): Promise<Category[]> {
+  const response = await fetch(`${API_BASE_URL}/categories/parent/${parentId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    next: { revalidate: 60 }, // Revalidate every 60 seconds
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch child categories: ${response.statusText}`);
   }
 
   return response.json();

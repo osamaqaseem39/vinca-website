@@ -1,115 +1,169 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { fetchCategories, fetchCategoriesByParent } from '@/lib/api';
+import { Category } from '@/types/category';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [parentCategories, setParentCategories] = useState<Category[]>([]);
+  const [childCategories, setChildCategories] = useState<Category[]>([]);
+  const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
+  const pathname = usePathname();
+
+  // Fetch parent categories on mount
+  useEffect(() => {
+    const loadParentCategories = async () => {
+      try {
+        const categories = await fetchCategories(true);
+        setParentCategories(categories);
+      } catch (error) {
+        console.error('Failed to load categories:', error);
+      }
+    };
+    loadParentCategories();
+  }, []);
+
+  // Load child categories for a parent
+  const loadChildCategories = async (parentId: string) => {
+    if (selectedParentId === parentId && childCategories.length > 0) {
+      return; // Already loaded
+    }
+    try {
+      const children = await fetchCategoriesByParent(parentId);
+      setSelectedParentId(parentId);
+      setChildCategories(children);
+    } catch (error) {
+      console.error('Failed to load child categories:', error);
+    }
+  };
+
+  // Determine selected parent based on current pathname
+  useEffect(() => {
+    const findMatchingCategory = async () => {
+      if (parentCategories.length === 0) return;
+      
+      // First, check if pathname matches a parent category
+      for (const category of parentCategories) {
+        const categoryPath = `/categories/${category.slug}`;
+        if (pathname === categoryPath || pathname.startsWith(`${categoryPath}/`)) {
+          await loadChildCategories(category._id);
+          return;
+        }
+      }
+      
+      // If pathname matches a child category that's currently loaded, keep parent selected
+      const matchingChild = childCategories.find(child => {
+        const childPath = `/categories/${child.slug}`;
+        return pathname === childPath || pathname.startsWith(`${childPath}/`);
+      });
+      
+      if (matchingChild) {
+        // Keep current selection
+        return;
+      }
+      
+      // If we're on a category page but no match, try to find parent by checking all categories
+      if (pathname.startsWith('/categories/')) {
+        // Fetch all categories to find which parent the current slug belongs to
+        try {
+          const allCategories = await fetchCategories(false);
+          const pathSlug = pathname.split('/categories/')[1]?.split('/')[0];
+          const matchingCategory = allCategories.find(cat => cat.slug === pathSlug);
+          
+          if (matchingCategory && matchingCategory.parent) {
+            const parentId = typeof matchingCategory.parent === 'string' 
+              ? matchingCategory.parent 
+              : matchingCategory.parent._id;
+            await loadChildCategories(parentId);
+            return;
+          }
+        } catch (error) {
+          console.error('Failed to fetch all categories:', error);
+        }
+      }
+      
+      // If no match found and we're not on a category page, clear selection
+      if (!pathname.startsWith('/categories/')) {
+        setSelectedParentId(null);
+        setChildCategories([]);
+      }
+    };
+    
+    findMatchingCategory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, parentCategories]);
+
+  const isActive = (path: string) => pathname === path || pathname.startsWith(path + '/');
 
   return (
-    <header className="w-full">
-      {/* Main Header with Logo and Actions */}
-      <div className="border-b border-gray-200 sticky top-0 bg-white z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
+    <header className="w-full bg-white">
+      {/* Top Navigation Bar */}
+      <div className="border-b border-black sticky top-0 bg-white z-50">
+        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-3">
+            {/* Left Side - Main Categories (Parent Categories from Backend) */}
+            <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6 text-xs font-light tracking-wide">
+              {parentCategories.length > 0 ? (
+                parentCategories.map((category) => (
+                  <Link
+                    key={category._id}
+                    href={`/categories/${category.slug}`}
+                    className="uppercase hover:opacity-70 transition-opacity"
+                    onMouseEnter={() => loadChildCategories(category._id)}
+                  >
+                    {category.name.toUpperCase()}
+                  </Link>
+                ))
+              ) : (
+                // Fallback loading state
+                <span className="uppercase text-gray-400">Loading...</span>
+              )}
+            </nav>
+
+            {/* Center - Logo */}
             <Link 
               href="/" 
-              className="text-xl font-light tracking-[0.2em] uppercase hover:opacity-70 transition-opacity"
+              className="text-xl lg:text-2xl font-bold tracking-wider uppercase absolute left-1/2 -translate-x-1/2 hover:opacity-70 transition-opacity"
             >
               VINCA
             </Link>
 
-            {/* Navigation Links */}
-            <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8 text-xs font-normal tracking-wide">
+            {/* Right Side - Utilities */}
+            <div className="flex items-center space-x-4 lg:space-x-6 text-xs font-light tracking-wide ml-auto">
               <Link 
-                href="/women" 
-                className="hover:underline uppercase transition-opacity hover:opacity-70"
+                href="/client-services"
+                className="hidden lg:block uppercase hover:opacity-70 transition-opacity"
               >
-                WOMEN
+                CLIENT SERVICES
               </Link>
               <Link 
-                href="/men" 
-                className="hover:underline uppercase transition-opacity hover:opacity-70"
+                href="/login"
+                className="hidden lg:block uppercase hover:opacity-70 transition-opacity"
               >
-                MEN
+                LOGIN
               </Link>
-              <Link 
-                href="/kids" 
-                className="hover:underline uppercase transition-opacity hover:opacity-70"
-              >
-                KIDS
-              </Link>
-              <Link 
-                href="/prescription" 
-                className="hover:underline uppercase transition-opacity hover:opacity-70"
-              >
-                PRESCRIPTION
-              </Link>
-              <Link 
-                href="/sunglasses" 
-                className="hover:underline uppercase font-semibold transition-opacity hover:opacity-70"
-              >
-                SUNGLASSES
-              </Link>
-              <Link 
-                href="/reading" 
-                className="hover:underline uppercase transition-opacity hover:opacity-70"
-              >
-                READING
-              </Link>
-              <Link 
-                href="/frames" 
-                className="hover:underline uppercase transition-opacity hover:opacity-70"
-              >
-                FRAMES
-              </Link>
-              <Link 
-                href="/lenses" 
-                className="hover:underline uppercase transition-opacity hover:opacity-70"
-              >
-                LENSES
-              </Link>
-              <Link 
-                href="/accessories" 
-                className="hover:underline uppercase transition-opacity hover:opacity-70"
-              >
-                ACCESSORIES
-              </Link>
-            </nav>
-
-            {/* Right Side Actions */}
-            <div className="flex items-center space-x-4 md:space-x-6">
               <button 
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 className="hover:opacity-70 transition-opacity p-1" 
                 aria-label="Search"
                 title="Search"
               >
-                <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </button>
               <Link
-                href="/store-locator"
-                className="hidden md:block hover:opacity-70 transition-opacity p-1" 
-                aria-label="Store Locator"
-                title="Store Locator"
+                href="/wishlist"
+                className="hover:opacity-70 transition-opacity p-1"
+                aria-label="Wishlist"
+                title="Wishlist"
               >
-                <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </Link>
-              <Link 
-                href="/account"
-                className="hover:opacity-70 transition-opacity p-1" 
-                aria-label="Account"
-                title="Account"
-              >
-                <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                 </svg>
               </Link>
               <Link 
@@ -118,26 +172,56 @@ export default function Header() {
                 aria-label="Shopping Bag"
                 title="Shopping Bag"
               >
-                <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
-                {/* Cart badge can be added here when cart count is available */}
-                {/* <span className="absolute -top-1 -right-1 bg-black text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">0</span> */}
               </Link>
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="lg:hidden uppercase hover:opacity-70 transition-opacity"
+                aria-label="Menu"
+              >
+                MENU
+              </button>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Secondary Navigation Bar (Child Categories) */}
+      {childCategories.length > 0 && (
+        <div className="border-b border-black">
+          <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+            <nav className="flex items-center overflow-x-auto space-x-4 lg:space-x-6 py-2 text-xs font-light tracking-wide">
+              <Link 
+                href="/products" 
+                className={`uppercase whitespace-nowrap hover:opacity-70 transition-opacity px-2 py-1 ${isActive('/products') ? 'border border-black' : ''}`}
+              >
+                VIEW ALL
+              </Link>
+              {childCategories.map((category) => (
+                <Link
+                  key={category._id}
+                  href={`/categories/${category.slug}`}
+                  className={`uppercase whitespace-nowrap hover:opacity-70 transition-opacity px-2 py-1 ${isActive(`/categories/${category.slug}`) ? 'border border-black' : ''}`}
+                >
+                  {category.name.toUpperCase()}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </div>
+      )}
+
       {/* Search Bar (when search is open) */}
       {isSearchOpen && (
-        <div className="border-b border-gray-200 bg-white">
-          <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="border-b border-black bg-white">
+          <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <form className="relative">
               <input
                 type="text"
                 placeholder="Search products..."
-                className="w-full px-4 py-3 pr-12 border border-gray-300 text-sm font-light focus:outline-none focus:border-gray-500 transition-colors"
+                className="w-full px-4 py-2 pr-10 border border-black text-sm font-light bg-white focus:outline-none focus:ring-1 focus:ring-black"
                 autoFocus
               />
               <button
@@ -154,98 +238,46 @@ export default function Header() {
         </div>
       )}
 
-      {/* Mobile Menu Button */}
-      <div className="lg:hidden border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-3">
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="text-xs font-light uppercase tracking-wide hover:opacity-70 transition-opacity flex items-center space-x-2"
-            aria-label="Menu"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {isMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
-            <span>{isMenuOpen ? 'CLOSE' : 'MENU'}</span>
-          </button>
-        </div>
-      </div>
-
       {/* Mobile Navigation Menu */}
       {isMenuOpen && (
-        <div className="lg:hidden border-b border-gray-200 bg-white">
-          <nav className="max-w-7xl mx-auto px-6 py-6 space-y-4 text-xs font-normal tracking-wide">
-            <Link 
-              href="/women" 
-              className="block hover:underline uppercase py-2 transition-opacity hover:opacity-70"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              WOMEN
-            </Link>
-            <Link 
-              href="/men" 
-              className="block hover:underline uppercase py-2 transition-opacity hover:opacity-70"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              MEN
-            </Link>
-            <Link 
-              href="/kids" 
-              className="block hover:underline uppercase py-2 transition-opacity hover:opacity-70"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              KIDS
-            </Link>
-            <Link 
-              href="/prescription" 
-              className="block hover:underline uppercase py-2 transition-opacity hover:opacity-70"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              PRESCRIPTION
-            </Link>
-            <Link 
-              href="/sunglasses" 
-              className="block hover:underline uppercase font-semibold py-2 transition-opacity hover:opacity-70"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              SUNGLASSES
-            </Link>
-            <Link 
-              href="/reading" 
-              className="block hover:underline uppercase py-2 transition-opacity hover:opacity-70"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              READING
-            </Link>
-            <Link 
-              href="/frames" 
-              className="block hover:underline uppercase py-2 transition-opacity hover:opacity-70"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              FRAMES
-            </Link>
-            <Link 
-              href="/lenses" 
-              className="block hover:underline uppercase py-2 transition-opacity hover:opacity-70"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              LENSES
-            </Link>
-            <Link 
-              href="/accessories" 
-              className="block hover:underline uppercase py-2 transition-opacity hover:opacity-70"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              ACCESSORIES
-            </Link>
+        <div className="lg:hidden border-b border-black bg-white">
+          <nav className="px-4 sm:px-6 py-6 space-y-4 text-xs font-light tracking-wide">
+            {parentCategories.length > 0 ? (
+              <>
+                {parentCategories.map((category) => (
+                  <Link
+                    key={category._id}
+                    href={`/categories/${category.slug}`}
+                    className="block uppercase py-2 hover:opacity-70 transition-opacity"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {category.name.toUpperCase()}
+                  </Link>
+                ))}
+                <Link 
+                  href="/client-services" 
+                  className="block uppercase py-2 hover:opacity-70 transition-opacity"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  CLIENT SERVICES
+                </Link>
+                <Link 
+                  href="/login" 
+                  className="block uppercase py-2 hover:opacity-70 transition-opacity"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  LOGIN
+                </Link>
+              </>
+            ) : (
+              <span className="uppercase text-gray-400">Loading...</span>
+            )}
           </nav>
         </div>
       )}
     </header>
   );
 }
+
 
 

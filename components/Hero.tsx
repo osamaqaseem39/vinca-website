@@ -36,7 +36,7 @@ export default function Hero({
             <div className="pt-4">
               <Link
                 href={ctaLink}
-                className="inline-block bg-black text-white px-8 py-3 text-xs font-light uppercase tracking-wider hover:opacity-80 transition-opacity"
+                className="inline-block border border-black text-black px-8 py-3 text-xs font-light uppercase tracking-wider hover:bg-black hover:text-white transition-all"
               >
                 {ctaText}
               </Link>
