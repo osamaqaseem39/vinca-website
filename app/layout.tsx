@@ -9,8 +9,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "VINCA - Premium Optics & Eyewear",
-  description: "VINCA - Premium Optics Store for Prescription Glasses, Sunglasses, and Eyewear",
+  title: "VINCA - Premium Store",
+  description: "VINCA - Discover our premium collection of products",
 };
 
 export default function RootLayout({

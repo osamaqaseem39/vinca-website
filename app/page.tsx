@@ -14,10 +14,8 @@ export default async function Home() {
   let featuredProduct: Product | undefined;
 
   try {
-    // Fetch products for men's sunglasses
+    // Fetch all products
     const productsData = await fetchProducts({
-      gender: 'men',
-      lensType: 'sunglasses',
       limit: 100, // Get more products to match the grid
       sort: 'createdAt',
       order: 'desc',
@@ -37,8 +35,6 @@ export default async function Home() {
 
   const breadcrumbItems = [
     { label: 'HOME', href: '/' },
-    { label: 'MEN', href: '/men' },
-    { label: 'SUNGLASSES' },
   ];
 
   return (
@@ -48,10 +44,10 @@ export default async function Home() {
       {/* Hero Section */}
       <Hero 
         featuredProduct={featuredProduct}
-        title="SUNGLASSES FOR MEN"
-        subtitle="Discover our premium collection of men's sunglasses"
+        title="PREMIUM COLLECTION"
+        subtitle="Discover our curated selection of products"
         ctaText="Shop Collection"
-        ctaLink="/men/sunglasses"
+        ctaLink="/products"
       />
 
       <Breadcrumb items={breadcrumbItems} />
