@@ -35,7 +35,7 @@ export async function fetchProducts(params?: {
     headers: {
       'Content-Type': 'application/json',
     },
-    cache: 'no-store', // For Next.js, ensure fresh data
+    next: { revalidate: 60 }, // Revalidate every 60 seconds
   });
 
   if (!response.ok) {
@@ -51,7 +51,7 @@ export async function fetchProductById(id: string): Promise<Product> {
     headers: {
       'Content-Type': 'application/json',
     },
-    cache: 'no-store',
+    next: { revalidate: 60 }, // Revalidate every 60 seconds
   });
 
   if (!response.ok) {
@@ -67,7 +67,7 @@ export async function fetchFeaturedProducts(): Promise<Product[]> {
     headers: {
       'Content-Type': 'application/json',
     },
-    cache: 'no-store',
+    next: { revalidate: 60 }, // Revalidate every 60 seconds
   });
 
   if (!response.ok) {

@@ -5,6 +5,9 @@ import ProductGrid from '@/components/ProductGrid';
 import { fetchProducts, fetchFeaturedProducts } from '@/lib/api';
 import { Product } from '@/types/product';
 
+// Enable static generation with ISR
+export const revalidate = 60; // Revalidate every 60 seconds
+
 export default async function Home() {
   let products: Product[] = [];
   let featuredProduct: Product | undefined;

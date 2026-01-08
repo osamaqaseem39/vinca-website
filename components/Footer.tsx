@@ -5,7 +5,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Customer Service */}
           <div>
-            <h3 className="text-xs font-medium mb-4 uppercase tracking-wider">CUSTOMER SERVICE</h3>
+            <h3 className="text-xs font-light mb-4 uppercase tracking-wider">CUSTOMER SERVICE</h3>
             <ul className="space-y-2 text-xs font-light">
               <li><a href="#" className="hover:underline transition-colors">Contact Us</a></li>
               <li><a href="#" className="hover:underline transition-colors">FAQ</a></li>

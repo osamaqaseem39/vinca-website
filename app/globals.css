@@ -3,9 +3,22 @@
 @tailwind utilities;
 
 :root {
-  --font-inter: 'Inter', sans-serif;
+  --font-poppins: 'Poppins', sans-serif;
+}
+
+* {
+  font-weight: 300;
 }
 
 body {
-  font-family: var(--font-inter);
+  font-family: var(--font-poppins);
+  font-weight: 300;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 300;
+  letter-spacing: 0.02em;
 }
