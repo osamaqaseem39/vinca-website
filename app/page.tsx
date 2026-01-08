@@ -2,47 +2,39 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import FeaturedProduct from '@/components/FeaturedProduct';
 import ProductGrid from '@/components/ProductGrid';
+import { fetchProducts, fetchFeaturedProducts } from '@/lib/api';
 import { Product } from '@/types/product';
 
-// Sample product data matching the image description
-const products: Product[] = [
-  { id: '1', name: 'RODEO HANDBAG MEDIUM', colors: 6 },
-  { id: '2', name: 'RODEO HANDBAG SMALL', colors: 4 },
-  { id: '3', name: 'RODEO HANDBAG MEDIUM', colors: 7 },
-  { id: '4', name: 'RODEO HANDBAG SMALL', colors: 2 },
-  { id: '5', name: 'CURVED WAIST PANTS' },
-  { id: '6', name: 'CURVED WAISTBAND JACKET' },
-  { id: '7', name: 'RODEO HANDBAG MINI' },
-  { id: '8', name: 'AVENUE PUMP' },
-  { id: '9', name: 'TOP RAKING LONG SLEEVE FITTED TOP' },
-  { id: '10', name: 'FUR TRIM FLARED CAPRI PANTS' },
-  { id: '11', name: 'LE CITY BAG EAST-WEST' },
-  { id: '12', name: 'CITY UPTOWN SANDAL' },
-  { id: '13', name: 'GATHERED CROPPED TOP' },
-  { id: '14', name: 'GOBET MAXI SKIRT' },
-  { id: '15', name: 'PAMELA SHOULDER BAG SMALL' },
-  { id: '16', name: 'CITY SNEAKER', colors: 2 },
-  { id: '17', name: 'LION OUTERWEAR ZIP-UP HOODIE' },
-  { id: '18', name: 'WORKWEAR PANTS' },
-  { id: '19', name: 'SHOPPER DUST BAG POUCH' },
-  { id: '20', name: 'ZIL SNEAKER' },
-  { id: '21', name: 'STANDARD COAT' },
-  { id: '22', name: 'SWEETHEART DRESS' },
-  { id: '23', name: 'LE CITY BAG NANO', colors: 6 },
-  { id: '24', name: 'AVORIE PALAZZO PUMP' },
-  // Adding more products to reach 99
-  ...Array.from({ length: 75 }, (_, i) => ({
-    id: `product-${i + 25}`,
-    name: `PRODUCT ${i + 25}`,
-    colors: i % 3 === 0 ? Math.floor(Math.random() * 8) + 1 : undefined,
-  })),
-];
+export default async function Home() {
+  let products: Product[] = [];
+  let featuredProduct: Product | undefined;
 
-export default function Home() {
+  try {
+    // Fetch products for men's sunglasses
+    const productsData = await fetchProducts({
+      gender: 'men',
+      lensType: 'sunglasses',
+      limit: 100, // Get more products to match the grid
+      sort: 'createdAt',
+      order: 'desc',
+    });
+    products = productsData.products;
+
+    // Fetch featured products and use the first one
+    const featured = await fetchFeaturedProducts();
+    if (featured.length > 0) {
+      featuredProduct = featured[0];
+    }
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    // If API fails, products array will be empty
+    // The UI will handle empty state gracefully
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
-      <FeaturedProduct />
+      {featuredProduct && <FeaturedProduct product={featuredProduct} />}
       <div className="border-b border-gray-200"></div>
       <ProductGrid products={products} />
       <Footer />

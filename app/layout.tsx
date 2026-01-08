@@ -8,8 +8,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Balenciaga - Spring 26",
-  description: "Balenciaga Spring 26 Collection",
+  title: "VINCA - Premium Optics & Eyewear",
+  description: "VINCA - Premium Optics Store for Prescription Glasses, Sunglasses, and Eyewear",
 };
 
 export default function RootLayout({
