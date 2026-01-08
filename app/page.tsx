@@ -1,6 +1,7 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import FeaturedProduct from '@/components/FeaturedProduct';
+import Breadcrumb from '@/components/Breadcrumb';
+import Hero from '@/components/Hero';
 import ProductGrid from '@/components/ProductGrid';
 import { fetchProducts, fetchFeaturedProducts } from '@/lib/api';
 import { Product } from '@/types/product';
@@ -34,12 +35,30 @@ export default async function Home() {
     // The UI will handle empty state gracefully
   }
 
+  const breadcrumbItems = [
+    { label: 'HOME', href: '/' },
+    { label: 'MEN', href: '/men' },
+    { label: 'SUNGLASSES' },
+  ];
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white flex flex-col">
       <Header />
-      {featuredProduct && <FeaturedProduct product={featuredProduct} />}
-      <div className="border-b border-gray-200"></div>
+      
+      {/* Hero Section */}
+      <Hero 
+        featuredProduct={featuredProduct}
+        title="SUNGLASSES FOR MEN"
+        subtitle="Discover our premium collection of men's sunglasses"
+        ctaText="Shop Collection"
+        ctaLink="/men/sunglasses"
+      />
+
+      <Breadcrumb items={breadcrumbItems} />
+      
+      {/* Products Section */}
       <ProductGrid products={products} />
+      
       <Footer />
     </div>
   );
