@@ -13,11 +13,11 @@ export default function FeaturedProduct({ product }: FeaturedProductProps) {
   }
 
   return (
-    <section className="w-full border-b border-gray-200">
-      <div className="max-w-full mx-auto">
-        <div className="flex items-center justify-center py-12">
+    <section className="w-full border-b border-black bg-white">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-center py-16">
           {/* Featured Product Image */}
-          <div className="relative w-64 h-64 bg-white">
+          <div className="relative w-64 h-64 bg-white border border-black">
             {product.images && product.images.length > 0 ? (
               <Image
                 src={product.images[0]}
@@ -27,8 +27,8 @@ export default function FeaturedProduct({ product }: FeaturedProductProps) {
                 sizes="256px"
               />
             ) : (
-              <div className="w-full h-full bg-gray-50 flex items-center justify-center">
-                <span className="text-gray-400 text-xs">No Image</span>
+              <div className="w-full h-full bg-white flex items-center justify-center">
+                <span className="text-xs tracking-widest uppercase text-black/40">No Image</span>
               </div>
             )}
           </div>
@@ -37,4 +37,3 @@ export default function FeaturedProduct({ product }: FeaturedProductProps) {
     </section>
   );
 }
-

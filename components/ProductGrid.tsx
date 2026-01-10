@@ -11,10 +11,10 @@ interface ProductGridProps {
 export default function ProductGrid({ products }: ProductGridProps) {
   if (products.length === 0) {
     return (
-      <section className="w-full py-12 bg-white flex-grow">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="w-full py-16 bg-white flex-grow border-b border-black">
+        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-12">
-            <p className="text-sm font-light text-gray-500">No products found</p>
+            <p className="text-xs tracking-widest uppercase text-black/40">No products found</p>
           </div>
         </div>
       </section>
@@ -22,10 +22,10 @@ export default function ProductGrid({ products }: ProductGridProps) {
   }
 
   return (
-    <section className="w-full py-12 bg-white flex-grow">
-      <div className="max-w-7xl mx-auto px-6">
-        {/* Product Grid - 4 columns matching the image */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8 mb-12">
+    <section className="w-full py-16 bg-white flex-grow border-b border-black">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Product Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 lg:gap-12 mb-16">
           {products.map((product) => (
             <Link
               key={product._id || product.id}
@@ -33,29 +33,29 @@ export default function ProductGrid({ products }: ProductGridProps) {
               className="group relative bg-white block"
             >
               {/* Product Image */}
-              <div className="aspect-square bg-white mb-3 flex items-center justify-center overflow-hidden relative">
+              <div className="aspect-square bg-white mb-4 flex items-center justify-center overflow-hidden relative border border-black">
                 {product.images && product.images.length > 0 ? (
                   <Image
                     src={product.images[0]}
                     alt={product.name}
                     fill
-                    className="object-contain group-hover:scale-105 transition-transform duration-300"
+                    className="object-contain group-hover:opacity-60 transition-opacity duration-300"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gray-50 flex items-center justify-center">
-                    <span className="text-gray-400 text-xs">No Image</span>
+                  <div className="w-full h-full bg-white flex items-center justify-center">
+                    <span className="text-xs tracking-widest uppercase text-black/40">No Image</span>
                   </div>
                 )}
               </div>
 
               {/* Product Info */}
-              <div className="text-xs font-light">
-                <h3 className="mb-1 tracking-wide group-hover:opacity-70 transition-opacity">
+              <div className="text-xs font-light tracking-widest uppercase space-y-1">
+                <h3 className="group-hover:opacity-60 transition-opacity">
                   {product.name}
                 </h3>
                 {product.price && (
-                  <p className="text-xs font-light text-gray-600">
+                  <p className="text-xs font-light tracking-widest uppercase">
                     ${product.price.toFixed(2)}
                   </p>
                 )}
@@ -69,19 +69,13 @@ export default function ProductGrid({ products }: ProductGridProps) {
           <div className="text-center mb-12">
             <Link
               href="/products"
-              className="inline-block border border-black text-black px-8 py-3 text-xs font-light uppercase tracking-wider hover:bg-black hover:text-white transition-all mb-4"
+              className="inline-block border border-black text-black px-8 py-3 text-xs font-light tracking-widest uppercase hover:bg-black hover:text-white transition-all mb-4"
             >
-              SHOP SIMILAR
+              VIEW ALL PRODUCTS
             </Link>
-            <p className="text-xs font-light text-gray-600 mt-4">
-              <Link href="/products" className="hover:underline">
-                VIEW ALL PRODUCTS
-              </Link>
-            </p>
           </div>
         )}
       </div>
     </section>
   );
 }
-
